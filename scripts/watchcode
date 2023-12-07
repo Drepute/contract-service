@@ -1,0 +1,4 @@
+#!/bin/sh
+
+apt-get update -y && apt-get install -y libyaml-dev procps &&
+    watchmedo shell-command --patterns="*.py;*.html;*.css;*.js;.env" --recursive --command='echo FILE CHANGED: "${watch_src_path}" && kill -HUP `ps -C gunicorn fch -o pid | head -n 1`' . &
