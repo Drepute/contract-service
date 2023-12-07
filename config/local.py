@@ -27,6 +27,15 @@ SECRET_KEY = "SECREYONLYIKNOW"
 REDIS_HOST = "redis_db"
 REDIS_PORT = 6379
 
+CELERYBEAT_SCHEDULE = {
+    "beat_schedule": {
+        'add-every-10-seconds': {
+            'task': 'event.tasks.run_task_subscriptions',
+            'schedule': 10.0
+        }
+    }
+}
+
 CELERY = {
         **CELERYBEAT_SCHEDULE,
         "broker_url": f"redis://{REDIS_HOST}:{REDIS_PORT}/0",
@@ -53,14 +62,7 @@ LOG_LEVEL = "DEBUG"
 # https://www.elastic.co/guide/en/apm/agent/python/6.x/troubleshooting.html#debug-mode
 # ELASTIC_APM["DEBUG"] = False
 
-CELERYBEAT_SCHEDULE = {
-    "beat_schedule": {
-        'add-every-10-seconds': {
-            'task': 'event.tasks.run_task_subscriptions',
-            'schedule': 10.0
-        }
-    }
-}
+
 
 
 ETHEREUM_RPC = "https://eth-mainnet.g.alchemy.com/v2/ppadjzXPF3e1iqEu3YZaBOqW-WaXGIH1"

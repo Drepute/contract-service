@@ -19,6 +19,7 @@ class Subscription(CreatedUpdatedAtMixin, db.Model):
     last_synced_block = db.Column(db.Integer, default=0)
     block_difference = db.Column(db.Integer, default=100)
     is_active = db.Column(db.Boolean, default=True)
+    cache_options = db.Column(JSON(none_as_null=False))
 
     def get_dict(self):
         return {

@@ -15,6 +15,7 @@ parameters:
     in: query
     type: string
     required: true
+    description: eg sum, count, average
   - name: filter_options
     in: query
     type: string

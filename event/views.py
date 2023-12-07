@@ -20,11 +20,12 @@ def like_tweet():
     from_block = req_json.get("from_block")
     to_block = req_json.get("to_block", None)
     block_difference = req_json.get("block_difference", 100)
+    cache_options = eval(req_json.get("block_difference", '{}'))
     if not address or not abi or not chain_id or not topic or not from_block:
         return error_response(BAD_PARAMS)
 
     from event.funcs import subscribe
-    success, message = subscribe(address, abi, chain_id, topic, from_block, to_block, block_difference)
+    success, message = subscribe(address, abi, chain_id, topic, from_block, to_block, block_difference, cache_options)
     if not success:
         return error_response(message)
     return success_response(message)
