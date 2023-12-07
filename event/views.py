@@ -44,43 +44,7 @@ def aggregate():
         return error_response(BAD_PARAMS)
 
     from event.funcs import aggregate
-    success, message = aggregate(collection_name, key, aggregator, filter_options={}, sort_options={})
-    if not success:
-        return error_response(message)
-    return success_response(message)
-
-
-@tweet.route("/retweet", methods=["GET"])
-def get_retweet():
-    """
-    file: specs/retweet.yml
-    """
-    account_id = request.args.get("account_id")
-    tweet_id = request.args.get("tweet_id")
-    if not account_id or not tweet_id:
-        return error_response(BAD_PARAMS)
-
-    from tweet.funcs import get_retweet
-    success, message = get_retweet(
-        account_id, tweet_id)
-    if not success:
-        return error_response(message)
-    return success_response(message)
-
-
-@tweet.route("/quote_tweet", methods=["GET"])
-def get_quote_tweet():
-    """
-    file: specs/quote_tweet.yml
-    """
-    account_id = request.args.get("account_id")
-    tweet_id = request.args.get("tweet_id")
-    if not account_id or not tweet_id:
-        return error_response(BAD_PARAMS)
-
-    from tweet.funcs import get_quote_tweet
-    success, message = get_quote_tweet(
-        account_id, tweet_id)
+    success, message = aggregate(collection_name, key, aggregator, filter_options, sort_options)
     if not success:
         return error_response(message)
     return success_response(message)
