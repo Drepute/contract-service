@@ -1,0 +1,35 @@
+Example endpoint returning aggregated value
+---
+tags:
+  - aggregate
+parameters:
+  - name: collection_name
+    in: query
+    type: string
+    required: true
+  - name: key
+    in: query
+    type: string
+    required: true
+  - name: aggregator
+    in: query
+    type: string
+    required: true
+  - name: filter_options
+    in: query
+    type: string
+    required: true
+    description: "eg '{key: value}'"
+  - name: sort_options
+    in: query
+    type: string
+    required: true
+    description: "eg '{key: value}'"
+responses:
+  200:
+    description: result
+    schema:
+      type: object
+      properties:
+        result:
+          type: number

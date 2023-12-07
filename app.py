@@ -16,7 +16,7 @@ import redis
 from logging_config import configure_logging
 from pymongo import MongoClient
 from event.models import *
-# from event.views import event
+from event.views import event
 
 
 def create_app(service_name="server"):
@@ -54,8 +54,8 @@ def create_app(service_name="server"):
 
     with app.app_context():
         # routes go here
-        # app.register_blueprint(
-        #     event, url_prefix=f"{base_url_prefix}/event")
+        app.register_blueprint(
+            event, url_prefix=f"{base_url_prefix}/event")
         app.register_blueprint(errors)
 
     @app.route(f"{base_url_prefix}/ping")

@@ -1,0 +1,52 @@
+Subscribe an event topic
+---
+tags:
+  - subscribe
+post:
+  description: Subscribe an event topic
+  parameters: 
+    - in: body
+      name: body
+      required: True
+      schema:
+        type: object
+        properties:
+          address:
+            type: string
+            required: false
+            description: contract address
+          abi:
+            type: string
+            required: true
+            description: abi eg [...]
+          chain_id:
+            type: number
+            required: true
+            description: blockchain id (1, 137, 80001)
+          topic:
+            type: string
+            required: true
+            description: topic to subscribe eg Portal()
+          from_block:
+            type: number
+            required: true
+            description: from block
+          to_block:
+            type: number
+            required: false
+            description: to block
+          block_difference:
+            type: number
+            required: false
+            description: block difference
+responses:
+  200:
+    description: Confirmation on subscription
+    schema:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            subscription_id:
+              type: number
