@@ -26,7 +26,7 @@ celery.config_from_object(app.config["CELERY"])
 celery.set_default()
 app.extensions["celery"] = celery
 celery.autodiscover_tasks(
-    ["event"],
+    ["event", "token_price"],
     force=True,
 )
 

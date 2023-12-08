@@ -39,7 +39,8 @@ CELERY = {
         "task_default_routing_key": "contract_service_tasks_queue",
         "task_routes": (
             [
-                ("event.tasks.*", {"queue": "contract_service_tasks_queue"})
+                ("event.tasks.*", {"queue": "contract_service_tasks_queue"}),
+                ("token_price.tasks.*", {"queue": "contract_service_tasks_queue"})
             ],
         ),
     }

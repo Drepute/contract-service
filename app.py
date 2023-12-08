@@ -17,6 +17,8 @@ from logging_config import configure_logging
 from pymongo import MongoClient
 from event.models import *
 from event.views import event
+from token_price.models import *
+from token_price.views import token_price
 
 
 def create_app(service_name="server"):

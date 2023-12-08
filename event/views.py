@@ -8,7 +8,7 @@ event = Blueprint("event", __name__)
 
 
 @event.route("/subscribe", methods=["POST"])
-def like_tweet():
+def event_subscribe():
     """
     file: specs/subscribe.yml
     """

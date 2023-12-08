@@ -1,29 +1,54 @@
 from flask import current_app as app
+from datetime import datetime as dt, timedelta
 
 
-class AmountToUSDAmountAdapter:
+class BaseAdapter:
+    def __init__(self, event_subscription):
+        self.event_subscription = event_subscription
+
+    def get_price(self, symbol, block_number, frequency):
+        block_timestamp = BaseAdapter.get_block_ts(block_number)
+        nearest_timestamp = BaseAdapter.get_nearest_ts(block_timestamp)
+        db = app.mongo_client.token_log
+        collection = db[f"{symbol}-{frequency}"]
+        record = collection.find({'timestamp': nearest_timestamp})[0]
+        return record['price']
+    
+    def get_block_ts(self, block_number):
+        db = app.mongo_client.token_log
+        collection = db[f"{self.event_subscription.chain_id}"]
+        record = collection.find({'blockNumber': block_number})[0]
+        return record['timestamp']
+    
+    def get_nearest_ts(self, timestamp, frequency):
+        if frequency == 60:
+            dt_object = dt.fromtimestamp(timestamp)
+            rounded_dt = dt_object.replace(minute=0, second=0, microsecond=0)
+            # If the timestamp's minute component is greater than 30, round to the next hour
+            if dt_object.minute >= 30:
+                rounded_dt += timedelta(hours=1)
+            return int(rounded_dt.timestamp())
+        return timestamp
+
+class AmountToUSDAmountAdapter(BaseAdapter):
     db = app.mongo_client.price
 
     """
     params:
         key: args.key
         symbol: Token Symbol (ETH, BTC etc)
+        decimals: decimals of symbol (18)
         blockNumber: "latest" or block number (blockNumber will be of record if key not found)
-
+        frequency: fetch price of symbol rounded to the timestamp as per frequency (eg 60 means price at nearest hr mark)
     """
     def process(records, params):
         for record in records:
-            record['args'][params['key']] = record['args'][params['key']] * \
-                AmountToUSDAmountAdapter.get_price(
+            record['args'][params['key']] = (record['args'][params['key']] * \
+                BaseAdapter.get_price(
                     params['symbol'], 
                     params.get('blockNumber', record['blockNumber']),
-                    params.get('frequency', 30)
-                )
-
-    def get_price(self, symbol, block_number):
-        # TODO
-        collection = self.db['symbol']
-        return collection.find()
+                    params.get('frequency', 60),
+                )) / (10**params['decimals'])
 
 
 class Transformer:
@@ -31,7 +56,8 @@ class Transformer:
         'usd_volume': AmountToUSDAmountAdapter
     }
 
-    def __init__(self, options):
+    def __init__(self, event_subscription, options):
+        self.event_subscription = event_subscription
         self.adapters = options.get('adapters')
         self.params_list = options.get('params_list', {})
 
@@ -39,5 +65,6 @@ class Transformer:
     def transform(self, records):
         in_process_records = records
         for i, adapter in enumerate(self.adapters):
-            in_process_records = self.adapters.get(adapter['name']).process(in_process_records, self.params_list[i])
+            adapter = self.adapters.get(adapter['name'])(self.event_subscription)
+            in_process_records = adapter.process(in_process_records, self.params_list[i])
         return in_process_records

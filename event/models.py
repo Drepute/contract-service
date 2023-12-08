@@ -1,12 +1,13 @@
 from sqlalchemy.dialects.mysql import JSON
 
-from common.models import (
-    CreatedUpdatedAtMixin,
-    CreatedAtMixin
-)
+from common.models import CreatedUpdatedAtMixin
+import enum
 from db import db
 
-    
+class TaskStatus(enum.IntEnum):
+    DONE = 1
+    PROCESSING = 2
+    FAILED = 3
 
 class Subscription(CreatedUpdatedAtMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -20,6 +21,7 @@ class Subscription(CreatedUpdatedAtMixin, db.Model):
     block_difference = db.Column(db.Integer, default=100)
     is_active = db.Column(db.Boolean, default=True)
     cache_options = db.Column(JSON(none_as_null=False))
+    state = db.Column(db.Enum(TaskStatus), default=TaskStatus.DONE)
 
     def get_dict(self):
         return {
@@ -32,4 +34,5 @@ class Subscription(CreatedUpdatedAtMixin, db.Model):
             "last_synced_block": self.last_synced_block,
             "block_difference": self.block_difference,
             "is_active": self.is_active,
+            "state": self.state
         }

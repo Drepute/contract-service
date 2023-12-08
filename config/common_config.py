@@ -8,8 +8,12 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 CELERYBEAT_SCHEDULE = {
     "beat_schedule": {
-        'add-every-300-seconds': {
+        'event-subscriptions-every-300-seconds': {
             'task': 'event.tasks.run_task_subscriptions',
+            'schedule': 300.0
+        },
+        'token-subscriptions-every-300-seconds': {
+            'task': 'token_price.tasks.run_token_price_task_subscriptions',
             'schedule': 300.0
         }
     }

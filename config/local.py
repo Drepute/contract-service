@@ -29,8 +29,12 @@ REDIS_PORT = 6379
 
 CELERYBEAT_SCHEDULE = {
     "beat_schedule": {
-        'add-every-10-seconds': {
+        'event-subscriptions-every-10-seconds': {
             'task': 'event.tasks.run_task_subscriptions',
+            'schedule': 10.0
+        },
+        'token-subscriptions-every-10-seconds': {
+            'task': 'token_price.tasks.run_token_price_task_subscriptions',
             'schedule': 10.0
         }
     }
@@ -47,7 +51,8 @@ CELERY = {
         "task_default_routing_key": "contract_service_tasks_queue",
         "task_routes": (
             [
-                ("event.tasks.*", {"queue": "contract_service_tasks_queue"})
+                ("event.tasks.*", {"queue": "contract_service_tasks_queue"}),
+                ("token_price.tasks.*", {"queue": "contract_service_tasks_queue"})
             ],
         ),
     }
