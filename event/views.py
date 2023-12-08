@@ -41,11 +41,12 @@ def aggregate():
     aggregator = request.args.get("aggregator"),
     filter_options = eval(request.args.get("filter_options", '{}'))
     sort_options = eval(request.args.get("sort_options", '{}'))
+    transform_options = eval(request.args.get("transform_options", '{}'))
     if not collection_name or not key or not aggregator:
         return error_response(BAD_PARAMS)
 
     from event.funcs import aggregate
-    success, message = aggregate(collection_name, key, aggregator, filter_options, sort_options)
+    success, message = aggregate(collection_name, key, aggregator, filter_options, sort_options, transform_options)
     if not success:
         return error_response(message)
     return success_response(message)

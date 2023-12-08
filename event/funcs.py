@@ -134,11 +134,25 @@ def count(records, key):
 def average(records, key):
     return sum(records, key) / count(records, key)
 
+def max(records, key):
+    res = records[0]['args'][key]
+    for record in records:
+        res = max(res, record['args'][key])
+    return res
+
+def min(records, key):
+    res = records[0]['args'][key]
+    for record in records:
+        res = min(res, record['args'][key])
+    return res
+
 agg_func = {
     'sum': sum,
     'count': count,
     'average': average
 }
+
+# operations transform [key , adapter], aggregate [key, adapter], filter [key, operation]
 
 def aggregate(collection_name, key, aggregator, filter_options, sort_options, transform_options):
     subscription_values = collection_name.split('-')
@@ -157,8 +171,10 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
     records = [record for record in cursor]
 
     if topic_input_types[key] == "uint256":
-        transform_options["adapters"] = [{"name": "bin_data_int"}] + transform_options["adapters"]
-        transform_options["params_list"] = [{'key': key}] + transform_options["params_list"]
+        transform_options["adapters"] = [{"name": "bin_data_int"}] + transform_options.get("adapters", [])
+        transform_options["params_list"] = [{}] + transform_options.get("params_list", [])
+    for i, param in enumerate(transform_options.get("params_list", [])):
+        transform_options["params_list"][i] = {"key": key, **param}
     transformer = Transformer(subscription, transform_options)
     transformed_records = transformer.transform(records)
 
