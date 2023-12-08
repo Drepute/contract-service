@@ -32,7 +32,6 @@ def run_task_subscriptions():
     tp_subscriptions = TokenPriceSubscription.query.filter_by(is_active=True).all()
     for tp_subscription in tp_subscriptions:
         if (tp_subscription.last_synced_timestamp/1000) + (tp_subscription.time_interval * 60) < int(time.time()):
-            print('fetch_token_price')
             fetch_token_price.apply_async(args=[tp_subscription.id])
 
 

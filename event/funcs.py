@@ -63,7 +63,6 @@ def fetch_event_logs(subscription_id):
         from web3.middleware import geth_poa_middleware
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     current_block_number = web3.eth.block_number
-    print(current_block_number)
     
     contract = web3.eth.contract(address=subscription.address, abi=subscription.abi['data'])
     logs = eval(f'contract.events.{subscription.topic}.get_logs(fromBlock=subscription.last_synced_block+1)')
@@ -120,22 +119,20 @@ def get_topic_input_types(subscription):
 
 ######## AGGREGATION LOGIC ###########
 
-def sum(records, key, key_type):
+def sum(records, key):
     res = 0
     for record in records:
-        if key_type == 'uint256':
-            value = int.from_bytes(record['args'][key], byteorder='big', signed=False)
-            res = res + value
+        res = res + record['args'][key]
     return res
 
-def count(records, key, key_type):
+def count(records, key):
     res = 0
     for _ in records:
         res = res + 1
     return res
 
-def average(records, key, key_type):
-    return sum(records, key, key_type) / count(records, key, key_type)
+def average(records, key):
+    return sum(records, key) / count(records, key)
 
 agg_func = {
     'sum': sum,
@@ -159,11 +156,14 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
     cursor = collection.find(filter_options).sort(sort_options)
     records = [record for record in cursor]
 
+    if topic_input_types[key] == "uint256":
+        transform_options["adapters"] = [{"name": "bin_data_int"}] + transform_options["adapters"]
+        transform_options["params_list"] = [{'key': key}] + transform_options["params_list"]
     transformer = Transformer(subscription, transform_options)
     transformed_records = transformer.transform(records)
 
 
-    return True, {'result': agg_func[aggregator](transformed_records, key, topic_input_types[key])}
+    return True, {'result': agg_func[aggregator](transformed_records, key)}
     
 
 
