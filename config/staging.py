@@ -19,6 +19,10 @@ SQLALCHEMY_DATABASE_URI = "mysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB}".format(
     **MAIN_DB_SETTINGS,
 )
 
+mongo_secret = get_secret("staging_mongo")
+
+MONGO_URI = mongo_secret["uri"]
+
 JWT_TOKEN_LOCATION = ["headers"]
 JWT_HEADER_NAME = "Authorization"
 JWT_HEADER_TYPE = "Bearer"
@@ -27,6 +31,8 @@ SECRET_KEY = db_secret["password"]
 
 REDIS_HOST = "staging-redis-cluster.x1kz4n.ng.0001.use1.cache.amazonaws.com"
 REDIS_PORT = 6379
+
+
 
 CELERY = {
         **CELERYBEAT_SCHEDULE,
