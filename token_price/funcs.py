@@ -48,10 +48,14 @@ def fetch_token_price(subscription_id):
     
     ccxt_exchange = getattr(ccxt, exchange)()
     logs = ccxt_exchange.fetch_ohlcv(market, time_step, since=since)
+    
+    
+    if logs[0][0] == tp_subscription.last_synced_timestamp:
+        logs = logs[1:]
     if len(logs) > 0:
         insert_ohlcv_logs(tp_subscription, logs)
-    tp_subscription.last_synced_timestamp = logs[-1][0]
-    db.session.commit()
+        tp_subscription.last_synced_timestamp = logs[-1][0]
+        db.session.commit()
     return logs
 
 
