@@ -37,11 +37,13 @@ def aggregate():
     file: specs/aggregate.yml
     """
     collection_name = request.args.get("collection_name")
-    key = request.args.get("key"),
-    aggregator = request.args.get("aggregator"),
+    key = request.args.get("key")
+    aggregator = request.args.get("aggregator")
     filter_options = eval(request.args.get("filter_options", '{}'))
     sort_options = eval(request.args.get("sort_options", '{}'))
     transform_options = eval(request.args.get("transform_options", '{}'))
+
+    print(collection_name, key, aggregator, filter_options, sort_options, transform_options)
     if not collection_name or not key or not aggregator:
         return error_response(BAD_PARAMS)
 
