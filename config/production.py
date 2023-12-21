@@ -17,6 +17,10 @@ SQLALCHEMY_DATABASE_URI = "mysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB}".format(
     **MAIN_DB_SETTINGS,
 )
 
+mongo_secret = get_secret("production_mongo")
+
+MONGO_URI = mongo_secret["uri"]
+
 JWT_TOKEN_LOCATION = ["headers"]
 JWT_HEADER_NAME = "Authorization"
 JWT_HEADER_TYPE = "Bearer"
