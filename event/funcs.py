@@ -59,15 +59,15 @@ def fetch_event_logs(subscription_id):
 
     rpc = get_rpc(subscription.chain_id)
     web3 = Web3(Web3.HTTPProvider(rpc))
-    if subscription.chain_id in [137, 80001]:
+    if subscription.chain_id in [137, 80001, 43114]:
         from web3.middleware import geth_poa_middleware
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     current_block_number = web3.eth.block_number
     
     contract = web3.eth.contract(address=subscription.address, abi=subscription.abi['data'])
-    logs = eval(f'contract.events.{subscription.topic}.get_logs(fromBlock=subscription.last_synced_block+1)')
-    last_synced_block = logs[-1].blockNumber if len(logs) > 0 else current_block_number
-
+    toBlock = subscription.last_synced_block+100000
+    logs = eval(f'contract.events.{subscription.topic}.get_logs(fromBlock=subscription.last_synced_block+1, toBlock=toBlock)')    
+    last_synced_block = logs[-1].blockNumber if len(logs) > 0 else toBlock
     if subscription.cache_options and subscription.cache_options.get("blockNumberTime"):
         block_number_ts_map = get_block_logs(subscription.chain_id, format="block_number_ts_map")
         block_number_timestamp_logs = []
@@ -87,7 +87,7 @@ def fetch_event_logs(subscription_id):
     db.session.commit()
 
     if last_synced_block < current_block_number:
-        fetch_event_logs.apply_async(args=[subscription.id])
+        fetch_event_logs.apply_async(args=[subscription.id], countdown=5)
     return logs
 
 def insert_event_logs(subscription, logs):

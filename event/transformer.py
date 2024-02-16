@@ -74,7 +74,7 @@ class Transformer:
 
     def __init__(self, event_subscription, options):
         self.event_subscription = event_subscription
-        self.adapters = options.get('adapters')
+        self.adapters = options.get('adapters', [])
         self.params_list = options.get('params_list', {})
 
     
