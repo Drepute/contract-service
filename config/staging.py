@@ -3,6 +3,7 @@ from secrets_manager import get_secret
 from kombu import Queue
 
 db_secret = get_secret("staging_mysql")
+rpc_urls = get_secret("rpc_urls")
 
 
 ENV = "staging"
@@ -60,6 +61,7 @@ ELASTIC_APM = get_secret("ELASTIC_APM")
 ELASTIC_APM["API_REQUEST_TIME"] = "5s"
 ELASTIC_APM["ENVIRONMENT"] = ENV
 
-ETHEREUM_RPC = "https://eth-mainnet.g.alchemy.com/v2/ppadjzXPF3e1iqEu3YZaBOqW-WaXGIH1"
-POLYGON_RPC = "https://polygon-mainnet.g.alchemy.com/v2/cI1PchyLH0nUYm_Io2uMjZ0BgofUVIWx"
-MUMBAI_RPC = "https://polygon-mumbai.g.alchemy.com/v2/eEwaiSpkH7pzEDWWoO5u77V91bk9BxOs"
+ETHEREUM_RPC = rpc_urls["ALCHEMY_ETHEREUM"]
+POLYGON_RPC = rpc_urls["ALCHEMY_POLYGON_MAIN"]
+MUMBAI_RPC = rpc_urls["ALCHEMY_POLYGON_MUMBAI"]
+AVALANCHE_RPC = rpc_urls["INFURA_AVALANCHE_C"]

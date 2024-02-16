@@ -66,10 +66,3 @@ LOG_LEVEL = "DEBUG"
 # ELASTIC_APM["API_REQUEST_TIME"] = "5s"
 # https://www.elastic.co/guide/en/apm/agent/python/6.x/troubleshooting.html#debug-mode
 # ELASTIC_APM["DEBUG"] = False
-
-
-
-
-ETHEREUM_RPC = "https://eth-mainnet.g.alchemy.com/v2/ppadjzXPF3e1iqEu3YZaBOqW-WaXGIH1"
-POLYGON_RPC = "https://polygon-mainnet.g.alchemy.com/v2/cI1PchyLH0nUYm_Io2uMjZ0BgofUVIWx"
-MUMBAI_RPC = "https://polygon-mumbai.g.alchemy.com/v2/eEwaiSpkH7pzEDWWoO5u77V91bk9BxOs"
