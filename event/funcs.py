@@ -101,7 +101,7 @@ def insert_event_logs(subscription, logs):
                 f_log['args'][arg] = Binary(f_log['args'][arg].to_bytes(32, byteorder='big'), 0)
         formatted_logs.append(f_log)
     db = app.mongo_client.event_log
-    collection = db[f"{subscription.address}-{subscription.chain_id}-{subscription.topic}"]
+    collection = db[f"{subscription.uuid}"]
     collection.insert_many(formatted_logs)
 
 
@@ -166,7 +166,7 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
     topic_input_types = get_topic_input_types(subscription)
 
     db = app.mongo_client.event_log
-    collection = db[collection_name]
+    collection = db[subscription.uuid]
     cursor = collection.find(filter_options).sort(sort_options)
     records = [record for record in cursor]
 

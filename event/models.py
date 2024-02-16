@@ -1,5 +1,5 @@
 from sqlalchemy.dialects.mysql import JSON
-
+import uuid
 from common.models import CreatedUpdatedAtMixin
 import enum
 from db import db
@@ -11,6 +11,7 @@ class TaskStatus(enum.IntEnum):
 
 class Subscription(CreatedUpdatedAtMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uuid = db.Column(db.String(36), default=uuid.uuid4)
     address = db.Column(db.String(72), nullable=False)
     abi = db.Column(JSON(none_as_null=False))
     chain_id = db.Column(db.Integer, nullable=False)
