@@ -169,7 +169,7 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
     collection = db[subscription.uuid]
     cursor = collection.find(filter_options).sort(sort_options)
     if aggregator == "count":
-        return True, {"result": cursor.count_documents()}
+        return True, {"result": collection.count_documents(filter_options)}
     records = [record for record in cursor]
 
     if topic_input_types[key] == "uint256":
