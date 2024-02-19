@@ -168,6 +168,8 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
     db = app.mongo_client.event_log
     collection = db[subscription.uuid]
     cursor = collection.find(filter_options).sort(sort_options)
+    if aggregator == "count":
+        return True, {"result": cursor.count_documents()}
     records = [record for record in cursor]
 
     if topic_input_types[key] == "uint256":
