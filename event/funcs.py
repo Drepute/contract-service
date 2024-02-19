@@ -119,37 +119,37 @@ def get_topic_input_types(subscription):
 
 ######## AGGREGATION LOGIC ###########
 
-def sum(records, key):
+def _sum(records, key):
     res = 0
     for record in records:
         res = res + record['args'][key]
     return res
 
-def count(records, key):
+def _count(records, key):
     res = 0
     for _ in records:
         res = res + 1
     return res
 
-def average(records, key):
-    return sum(records, key) / count(records, key)
+def _average(records, key):
+    return sum(records, key) / _count(records, key)
 
-def max(records, key):
+def _max(records, key):
     res = records[0]['args'][key]
     for record in records:
         res = max(res, record['args'][key])
     return res
 
-def min(records, key):
+def _min(records, key):
     res = records[0]['args'][key]
     for record in records:
         res = min(res, record['args'][key])
     return res
 
 agg_func = {
-    'sum': sum,
-    'count': count,
-    'average': average
+    'sum': _sum,
+    'count': _count,
+    'average': _average
 }
 
 # operations transform [key , adapter], aggregate [key, adapter], filter [key, operation]
