@@ -65,7 +65,7 @@ def fetch_event_logs(subscription_id):
     current_block_number = web3.eth.block_number
     
     contract = web3.eth.contract(address=subscription.address, abi=subscription.abi['data'])
-    toBlock = subscription.last_synced_block+100000
+    toBlock = min(subscription.last_synced_block+10000, current_block_number)
     logs = eval(f'contract.events.{subscription.topic}.get_logs(fromBlock=subscription.last_synced_block+1, toBlock=toBlock)')    
     last_synced_block = logs[-1].blockNumber if len(logs) > 0 else toBlock
     if subscription.cache_options and subscription.cache_options.get("blockNumberTime"):
