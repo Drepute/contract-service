@@ -53,7 +53,7 @@ def run_task_subscriptions():
             fetch_event_logs.apply_async(args=[subscription.id])
 
 
-def fetch_event_logs(subscription_id):
+def fetch_event_logs(subscription_id, blocks_to_fetch=10000):
     from event.tasks import fetch_event_logs
     subscription = Subscription.query.filter_by(id=subscription_id).first()
 
@@ -65,7 +65,7 @@ def fetch_event_logs(subscription_id):
     current_block_number = web3.eth.block_number
     
     contract = web3.eth.contract(address=subscription.address, abi=subscription.abi['data'])
-    toBlock = min(subscription.last_synced_block+10000, current_block_number)
+    toBlock = min(subscription.last_synced_block+blocks_to_fetch, current_block_number)
     logs = eval(f'contract.events.{subscription.topic}.get_logs(fromBlock=subscription.last_synced_block+1, toBlock=toBlock)')    
     last_synced_block = logs[-1].blockNumber if len(logs) > 0 else toBlock
     if subscription.cache_options and subscription.cache_options.get("blockNumberTime"):
@@ -97,7 +97,7 @@ def insert_event_logs(subscription, logs):
         f_log = dict(log)
         f_log["args"] = dict(f_log["args"])
         for arg in f_log['args'].keys():
-            if topic_input_types[arg] == 'uint256':
+            if topic_input_types[arg] in ['uint256', 'uint96']:
                 f_log['args'][arg] = Binary(f_log['args'][arg].to_bytes(32, byteorder='big'), 0)
         formatted_logs.append(f_log)
     db = app.mongo_client.event_log
@@ -170,6 +170,9 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
     cursor = collection.find(filter_options).sort(sort_options)
     if aggregator == "count":
         return True, {"result": collection.count_documents(filter_options)}
+    if aggregator == "mux_v1":
+        return True, {"result": mux_v1(collection, filter_options)}
+
     records = [record for record in cursor]
 
     if topic_input_types[key] == "uint256":
@@ -184,7 +187,35 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
     return True, {'result': agg_func[aggregator](transformed_records, key)}
     
 
+def aggregate_pipeline(collection_name, pipeline):
+    subscription_values = collection_name.split('-')
+    subscription = Subscription.query.filter(
+        Subscription.address == subscription_values[0],
+        Subscription.chain_id == int(subscription_values[1]), 
+        Subscription.topic == subscription_values[2], 
+    ).first()
+    if not subscription:
+        return False, NOT_FOUND
+    topic_input_types = get_topic_input_types(subscription)
 
+    db = app.mongo_client.event_log
+    collection = db[subscription.uuid]
+    pipeline = pipeline["data"]
+    result = collection.aggregate(pipeline)
+    return True, {'result': result}
+    
+############# Custom #########################
+
+def mux_v1(collection, filter_options):
+    cursor = collection.find(filter_options)
+    records = [record for record in cursor]
+    sum = 0
+    for record in records:
+        sum = sum + \
+            (int.from_bytes(record["args"]["mlpAmount"], byteorder='big', signed=False)/1e18)*\
+            (int.from_bytes(record["args"]["mlpPrice"], byteorder='big', signed=False)/1e18)
+        print(sum)
+    return sum
 
 ############# Block Logs ######################
 
