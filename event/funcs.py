@@ -59,14 +59,14 @@ def fetch_event_logs(subscription_id, blocks_to_fetch=10000):
 
     rpc = get_rpc(subscription.chain_id)
     web3 = Web3(Web3.HTTPProvider(rpc))
-    if subscription.chain_id in [137, 80001, 43114]:
+    if subscription.chain_id in [137, 80001, 43114, 8453]:
         from web3.middleware import geth_poa_middleware
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     current_block_number = web3.eth.block_number
-    
     contract = web3.eth.contract(address=subscription.address, abi=subscription.abi['data'])
     toBlock = min(subscription.last_synced_block+blocks_to_fetch, current_block_number)
-    logs = eval(f'contract.events.{subscription.topic}.get_logs(fromBlock=subscription.last_synced_block+1, toBlock=toBlock)')    
+
+    logs = eval(f'contract.events.{subscription.topic}.get_logs(fromBlock=subscription.last_synced_block+1, toBlock=toBlock)') 
     last_synced_block = logs[-1].blockNumber if len(logs) > 0 else toBlock
     if subscription.cache_options and subscription.cache_options.get("blockNumberTime"):
         block_number_ts_map = get_block_logs(subscription.chain_id, format="block_number_ts_map")
@@ -105,16 +105,10 @@ def insert_event_logs(subscription, logs):
     collection.insert_many(formatted_logs)
 
 
-
-
-
 def get_topic_input_types(subscription):
     topic_inputs = [event['inputs'] for event in json.loads(subscription.abi['data']) if event.get('name') == subscription.topic][0]
     topic_input_types = {input['name']: input['type'] for input in topic_inputs}
     return topic_input_types
-
-
-
 
 
 ######## AGGREGATION LOGIC ###########
@@ -172,6 +166,10 @@ def aggregate(collection_name, key, aggregator, filter_options, sort_options, tr
         return True, {"result": collection.count_documents(filter_options)}
     if aggregator == "mux_v1":
         return True, {"result": mux_v1(collection, filter_options)}
+    if aggregator == "molecule_balance_single":
+        return True, {"result": molecule_balance_single(collection, filter_options)}
+    # if aggregator == "molecule_balance_batch":
+    #     return True, {"result": molecule_balance_batch(collection, filter_options)}
 
     records = [record for record in cursor]
 
@@ -214,8 +212,10 @@ def mux_v1(collection, filter_options):
         sum = sum + \
             (int.from_bytes(record["args"]["mlpAmount"], byteorder='big', signed=False)/1e18)*\
             (int.from_bytes(record["args"]["mlpPrice"], byteorder='big', signed=False)/1e18)
-        print(sum)
     return sum
+
+def molecule_balance_single(collection, filter_options):
+    return collection.count_documents(filter_options)
 
 ############# Block Logs ######################
 

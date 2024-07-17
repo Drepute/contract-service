@@ -70,6 +70,7 @@ def get_rpc(chain_id):
         137: app.config['POLYGON_RPC'],
         43114: app.config["AVALANCHE_RPC"],
         80001: app.config['MUMBAI_RPC'],
+        8453: app.config['BASE_RPC']
 
     }
     return chain_id_rpc_map.get(chain_id)
