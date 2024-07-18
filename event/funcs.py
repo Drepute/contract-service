@@ -215,6 +215,12 @@ def mux_v1(collection, filter_options):
     return sum
 
 def molecule_balance_single(collection, filter_options):
+    if filter_options["args.to"] in [
+        "0x0D860d9541b9fd36fBC20ee3dD3B4395b8Fc4e89",
+        "0x95746AB75302e48Bd4156e1D5Eb7F7A2246497a6",
+        "0x4109E119635083dE64A8Ebf01C72Da4671E8E95d"
+    ]:
+        return 1
     return collection.count_documents(filter_options)
 
 ############# Block Logs ######################
